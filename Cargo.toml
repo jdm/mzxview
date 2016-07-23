@@ -1,0 +1,12 @@
+[package]
+name = "mzxview"
+version = "0.1.0"
+authors = ["Josh Matthews <josh@joshmatthews.net>"]
+
+[[bin]]
+name = "mzxview"
+path = "src/main.rs"
+
+[dependencies]
+image = "0.10"
+libmzx = { path = "../libmzx" }
