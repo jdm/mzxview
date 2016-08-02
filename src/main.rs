@@ -93,10 +93,10 @@ fn char_from_id(id: u8, param: u8) -> u8 {
         48 => 95,
 
         50 => 7,
-
-
-
-
+        51 => param,
+        52 => param,
+        53 => param,
+        54 => param,
         55 => 229,
 
         57 => 18,
@@ -118,8 +118,8 @@ fn char_from_id(id: u8, param: u8) -> u8 {
         73 => 42,
 
 
-
-
+        76 => param,
+        77 => param,
 
 
         80 => 235,
