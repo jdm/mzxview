@@ -146,6 +146,7 @@ fn char_from_id(id: u8, param: u8) -> u8 {
     }
 }
 
+#[allow(dead_code)]
 fn color_from_id(id: u8) -> Option<u8> {
     Some(match id {
         3 => 0x0A,
@@ -222,10 +223,10 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
         pixels.push(0);
     }
 
-    for (pos, (&(id, color, param), &(_under_id, under_color, _under_param)))
+    for (pos, (&(id, mut color, param), &(_under_id, under_color, _under_param)))
         in Zip::new((&board.level, &board.under)).enumerate() {
         let ch = char_from_id(id, param);
-        let mut color = color_from_id(id).unwrap_or(color);
+        //let mut color = color_from_id(id).unwrap_or(color);
         if color / num_colors == 0 {
             color = under_color / num_colors * num_colors + color;
         }
