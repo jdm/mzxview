@@ -23,14 +23,14 @@ fn draw_char(ch: u8,
              palette: &Palette,
              pixels: &mut Vec<u8>) {
     let char_bytes = charset.nth(ch);
-    for (y_off, byte) in char_bytes.iter().rev().enumerate() {
-        for bit in 0..8 {
-            let color = if byte & (1 << bit) != 0 {
+    for (y_off, byte) in char_bytes.iter().enumerate() {
+        for bit in 1..9 {
+            let color = if byte & (1 << (bit - 1)) != 0 {
                 &palette.colors[fg_color as usize]
             } else {
                 &palette.colors[bg_color as usize]
             };
-            let start = (y * 14 + y_off) * stride + (x * 8 + bit) * 3;
+            let start = (y * 14 + y_off) * stride + ((x + 1) * 8 - bit) * 3;
             let end = start + 3;
             let mut pixel = &mut pixels[start..end];
             pixel[0] = color.r * 4;
