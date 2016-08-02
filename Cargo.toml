@@ -9,4 +9,5 @@ path = "src/main.rs"
 
 [dependencies]
 image = "0.10"
+itertools = "0.4"
 libmzx = { path = "../libmzx" }
