@@ -4,7 +4,7 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
-use libmzx::{load_world, World, Charset, Palette};
+use libmzx::{load_world, World, Charset, Palette, Robot};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -40,7 +40,7 @@ fn draw_char(ch: u8,
     }
 }
 
-fn char_from_id(id: u8, param: u8) -> u8 {
+fn char_from_id(id: u8, param: u8, robots: &[Robot]) -> u8 {
     match id {
         0 => b' ',
         1 => 178,
@@ -139,6 +139,7 @@ fn char_from_id(id: u8, param: u8) -> u8 {
         94 => 153,
         95 => 148,
 
+        123 | 124 => robots[param as usize - 1].ch,
         125 => 226,
         126 => 232,
 
@@ -225,7 +226,7 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
 
     for (pos, (&(id, mut color, param), &(_under_id, under_color, _under_param)))
         in Zip::new((&board.level, &board.under)).enumerate() {
-        let ch = char_from_id(id, param);
+        let ch = char_from_id(id, param, &board.robots);
         //let mut color = color_from_id(id).unwrap_or(color);
         if color / num_colors == 0 {
             color = under_color / num_colors * num_colors + color;
