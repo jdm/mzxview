@@ -4,7 +4,7 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
-use libmzx::{load_world, World, Charset, Palette, Robot};
+use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -226,12 +226,39 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
         pixels.push(0);
     }
 
-    for (pos, (&(id, mut color, param), &(_under_id, under_color, _under_param)))
-        in Zip::new((&board.level, &board.under)).enumerate() {
-        let ch = char_from_id(id, param, &board.robots);
-        //let mut color = color_from_id(id).unwrap_or(color);
+    let mut empty_overlay = vec![];
+    let overlay = match board.overlay {
+        Some((OverlayMode::Static, ref data)) |
+        Some((OverlayMode::Normal, ref data)) => data,
+        _ => {
+            empty_overlay.reserve(board.width * board.height);
+            for _ in 0..(board.width * board.height) {
+                empty_overlay.push((32, 0x07));
+            }
+            &empty_overlay
+        }
+    };
+
+    for (pos, (&(id, mut color, param),
+               &(_under_id, under_color, _under_param),
+               &(overlay_char, overlay_color)))
+        in Zip::new((&board.level, &board.under, overlay)).enumerate() {
+        let overlay_visible = overlay_char != b' ';
+        let overlay_see_through = overlay_color / num_colors == 0 && overlay_color != 0x00;
+        let ch = if !overlay_visible {
+            char_from_id(id, param, &board.robots)
+        } else {
+            overlay_char
+        };
         if color / num_colors == 0 {
             color = under_color / num_colors * num_colors + color;
+        }
+        if overlay_visible {
+            if overlay_see_through {
+                color = color / num_colors * num_colors + overlay_color;
+            } else {
+                color = overlay_color;
+            }
         }
         draw_char(ch,
                   color % num_colors,
