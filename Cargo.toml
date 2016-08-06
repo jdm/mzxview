@@ -1,6 +1,7 @@
 [package]
 name = "mzxview"
 version = "0.1.0"
+license = "MIT"
 authors = ["Josh Matthews <josh@joshmatthews.net>"]
 
 [[bin]]
