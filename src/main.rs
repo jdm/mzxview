@@ -8,9 +8,11 @@ use libmzx::{load_world, World, Charset, Palette, Robot};
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::process::exit;
 
 fn print_usage() {
     println!("mzxview world.mzx <board#> out.png");
+    exit(1);
 }
 
 fn draw_char(ch: u8,
@@ -269,7 +271,7 @@ fn main() {
         }
         Err(e) => {
             println!("Error opening {} ({})", world_file, e);
-            return;
+            return exit(1);
         }
     };
 
@@ -277,7 +279,7 @@ fn main() {
         Ok(world) => world,
         Err(e) => {
             println!("Error reading {} ({:?})", world_file, e);
-            return;
+            return exit(1);
         }
     };
 
@@ -287,18 +289,18 @@ fn main() {
                 Some(img) => img,
                 None => {
                     println!("Error creating image from pixel buffer");
-                    return;
+                    return exit(1);
                 }
             };
             let dynamic_image = DynamicImage::ImageRgb8(img);
             if let Err(e) = dynamic_image.save(&mut file, ImageFormat::PNG) {
                 println!("Failed to save {} ({}).", image_path, e);
-                return;
+                return exit(1);
             }
         }
         Err(e) => {
             println!("Error creating {} ({})", image_path, e);
-            return;
+            return exit(1);
         }
     }
 }
