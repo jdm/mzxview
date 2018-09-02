@@ -5,7 +5,7 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
-use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode};
+use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode, Sensor};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -43,7 +43,7 @@ fn draw_char(ch: u8,
     }
 }
 
-fn char_from_id(id: u8, param: u8, robots: &[Robot]) -> u8 {
+fn char_from_id(id: u8, param: u8, robots: &[Robot], sensors: &[Sensor]) -> u8 {
     match id {
         0 => b' ',
         1 => 178,
@@ -142,6 +142,7 @@ fn char_from_id(id: u8, param: u8, robots: &[Robot]) -> u8 {
         94 => 153,
         95 => 148,
 
+        122 => sensors[param as usize - 1].ch,
         123 | 124 => robots[param as usize - 1].ch,
         125 => 226,
         126 => 232,
@@ -247,7 +248,7 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
         let overlay_visible = overlay_char != b' ';
         let overlay_see_through = overlay_color / num_colors == 0 && overlay_color != 0x00;
         let ch = if !overlay_visible {
-            char_from_id(id, param, &board.robots)
+            char_from_id(id, param, &board.robots, &board.sensors)
         } else {
             overlay_char
         };
