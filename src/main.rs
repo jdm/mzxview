@@ -300,7 +300,7 @@ fn main() {
         }
         Err(e) => {
             println!("Error opening {} ({})", world_file, e);
-            return exit(1);
+            exit(1)
         }
     };
 
@@ -308,7 +308,7 @@ fn main() {
         Ok(world) => world,
         Err(e) => {
             println!("Error reading {} ({:?})", world_file, e);
-            return exit(1);
+            exit(1)
         }
     };
 
@@ -318,18 +318,18 @@ fn main() {
                 Some(img) => img,
                 None => {
                     println!("Error creating image from pixel buffer");
-                    return exit(1);
+                    exit(1)
                 }
             };
             let dynamic_image = DynamicImage::ImageRgb8(img);
             if let Err(e) = dynamic_image.save(&mut file, ImageFormat::PNG) {
                 println!("Failed to save {} ({}).", image_path, e);
-                return exit(1);
+                exit(1)
             }
         }
         Err(e) => {
             println!("Error creating {} ({})", image_path, e);
-            return exit(1);
+            exit(1)
         }
     }
 }
