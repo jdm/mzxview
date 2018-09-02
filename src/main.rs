@@ -1,3 +1,4 @@
+extern crate env_logger;
 extern crate image;
 extern crate itertools;
 extern crate libmzx;
@@ -275,6 +276,7 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
 }
 
 fn main() {
+    env_logger::init();
     let mut args = env::args();
     let _binary = args.next();
     let world_file = match args.next() {
