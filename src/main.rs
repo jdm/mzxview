@@ -5,7 +5,10 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
-use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode, Sensor, Command};
+use libmzx::{
+    load_world, World, Charset, Palette, Robot, OverlayMode, Sensor, Command, Counters, Resolve,
+    WorldState, Board,
+};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -214,8 +217,7 @@ fn color_from_id(id: u8) -> Option<u8> {
     })
 }
 
-fn draw_img(w: &World, board_num: usize) -> Option<RgbImage> {
-    let board = &w.boards[board_num];
+fn draw_img(w: &WorldState, board: &Board, robots: &[Robot]) -> Option<RgbImage> {
     let charset = &w.charset;
     let palette = &w.palette;
     let num_colors = palette.colors.len() as u8;
@@ -249,7 +251,7 @@ fn draw_img(w: &World, board_num: usize) -> Option<RgbImage> {
         let overlay_visible = overlay_char != b' ';
         let overlay_see_through = overlay_color / num_colors == 0 && overlay_color != 0x00;
         let ch = if !overlay_visible {
-            char_from_id(id, param, &board.robots, &board.sensors)
+            char_from_id(id, param, &robots, &board.sensors)
         } else {
             overlay_char
         };
@@ -278,12 +280,12 @@ fn draw_img(w: &World, board_num: usize) -> Option<RgbImage> {
 }
 
 fn run_robot_until_end(
-    world: &mut World,
+    world: &mut WorldState,
+    board: &mut Board,
     world_path: &Path,
-    board_id: usize,
-    robot_id: usize
+    counters: &mut Counters,
+    robot: &mut Robot,
 ) {
-    let robot = &world.boards[board_id].robots[robot_id];
     for cmd in &robot.program {
         match cmd {
             Command::End => break,
@@ -300,6 +302,7 @@ fn run_robot_until_end(
                     }
                 }
             }
+
             Command::LoadPalette(ref p) => {
                 let path = world_path.join(p.to_string());
                 match File::open(&path) {
@@ -317,6 +320,13 @@ fn run_robot_until_end(
                     }
                 }
             }
+
+            Command::Char(ch) => {
+                robot.ch = ch.resolve(counters);
+            }
+            Command::Color(c) => {
+                board.level_at_mut(&robot.position).0 = c.resolve(counters).0;
+            }
             _ => (),
         }
     }
@@ -327,8 +337,9 @@ fn run_all_robots(
     world_path: &Path,
     board_id: usize
 ) {
-    for i in 0..world.boards[board_id].robots.len() {
-        run_robot_until_end(world, world_path, board_id, i);
+    let mut counters = Counters::new();
+    for robot in &mut world.board_robots[board_id] {
+        run_robot_until_end(&mut world.state, &mut world.boards[board_id], world_path, &mut counters, robot);
     }
 }
 
@@ -374,7 +385,7 @@ fn main() {
 
     match File::create(&image_path) {
         Ok(mut file) => {
-            let img = match draw_img(&world, board_num) {
+            let img = match draw_img(&world.state, &world.boards[board_num], &world.board_robots[board_num]) {
                 Some(img) => img,
                 None => {
                     println!("Error creating image from pixel buffer");
