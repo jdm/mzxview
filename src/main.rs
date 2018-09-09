@@ -385,6 +385,11 @@ fn main() {
         }
     };
 
+    if board_num >= world.boards.len() {
+        println!("World only contains {} boards", world.boards.len());
+        exit(1);
+    }
+
     let world_path = Path::new(&world_file).parent().unwrap();
     run_all_robots(&mut world, &world_path, board_num);
 
