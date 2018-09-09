@@ -158,68 +158,6 @@ fn char_from_id(id: u8, param: u8, robots: &[Robot], sensors: &[Sensor]) -> u8 {
     }
 }
 
-#[allow(dead_code)]
-fn color_from_id(id: u8) -> Option<u8> {
-    Some(match id {
-        3 => 0x0A,
-        8 => 0x07,
-        9 => 0x06,
-        18 => 0x07,
-        19 => 0x07,
-        27 => 0x06,
-        30 => 0x0C,
-        31 => 0x0E,
-        32 => 0x0B,
-        33 => 0x0F,
-        //34 => 0x18,
-        35 => 0x03,
-        36 => 0x08,
-        37 => 0x08,
-        38 => 0xEF,
-        47 => 0x08,
-        48 => 0x08,
-        50 => 0x0E,
-        55 => 0x07,
-        60 => 0x04,
-        61 => 0x0F,
-        62 => 0x08,
-        63 => 0x0C,
-        65 => 0x02,
-        66 => 0x0D,
-        67 => 0x1F,
-        68 => 0x1F,
-        69 => 0x1F,
-        70 => 0x1F,
-        72 => 0x09,
-        73 => 0x0A,
-        74 => 0x0C,
-        75 => 0x08,
-        78 => 0x0E,
-        79 => 0x0A,
-        80 => 0x02,
-        81 => 0x0F,
-        82 => 0x0C,
-        83 => 0x0A,
-        84 => 0x04,
-        85 => 0x07,
-        86 => 0x04,
-        87 => 0x0E,
-        88 => 0x07,
-        89 => 0x07,
-        90 => 0x02,
-        91 => 0x0B,
-        92 => 0x0F,
-        93 => 0x0F,
-        94 => 0x06,
-        95 => 0x06,
-        97 => 0x08,
-        125 => 0x08,
-        126 => 0x0F,
-        127 => 0x1B,
-        _ => return None,
-    })
-}
-
 fn draw_img(w: &WorldState, board: &Board, robots: &[Robot]) -> Option<RgbImage> {
     let charset = &w.charset;
     let palette = &w.palette;
