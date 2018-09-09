@@ -5,10 +5,11 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
-use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode, Sensor};
+use libmzx::{load_world, World, Charset, Palette, Robot, OverlayMode, Sensor, Command};
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 use std::process::exit;
 
 fn print_usage() {
@@ -213,8 +214,8 @@ fn color_from_id(id: u8) -> Option<u8> {
     })
 }
 
-fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
-    let board = &w.boards[board_num as usize];
+fn draw_img(w: &World, board_num: usize) -> Option<RgbImage> {
+    let board = &w.boards[board_num];
     let charset = &w.charset;
     let palette = &w.palette;
     let num_colors = palette.colors.len() as u8;
@@ -276,6 +277,61 @@ fn draw_img(w: &World, board_num: u8) -> Option<RgbImage> {
     RgbImage::from_raw(px_width as u32, px_height as u32, pixels)
 }
 
+fn run_robot_until_end(
+    world: &mut World,
+    world_path: &Path,
+    board_id: usize,
+    robot_id: usize
+) {
+    let robot = &world.boards[board_id].robots[robot_id];
+    for cmd in &robot.program {
+        match cmd {
+            Command::End => break,
+            Command::LoadCharSet(ref c) => {
+                let path = world_path.join(c.to_string());
+                match File::open(&path) {
+                    Ok(mut file) => {
+                        let mut v = vec![];
+                        file.read_to_end(&mut v).unwrap();
+                        world.charset.data.copy_from_slice(&v);
+                    }
+                    Err(e) => {
+                        println!("Error opening charset {} ({})", path.display(), e);
+                    }
+                }
+            }
+            Command::LoadPalette(ref p) => {
+                let path = world_path.join(p.to_string());
+                match File::open(&path) {
+                    Ok(mut file) => {
+                        let mut v = vec![];
+                        file.read_to_end(&mut v).unwrap();
+                        for (new, old) in v.chunks(3).zip(world.palette.colors.iter_mut()) {
+                            old.r = new[0];
+                            old.g = new[1];
+                            old.b = new[2];
+                        }
+                    }
+                    Err(e) => {
+                        println!("Error opening palette {} ({})", path.display(), e);
+                    }
+                }
+            }
+            _ => (),
+        }
+    }
+}
+
+fn run_all_robots(
+    world: &mut World,
+    world_path: &Path,
+    board_id: usize
+) {
+    for i in 0..world.boards[board_id].robots.len() {
+        run_robot_until_end(world, world_path, board_id, i);
+    }
+}
+
 fn main() {
     env_logger::init();
     let mut args = env::args();
@@ -285,7 +341,7 @@ fn main() {
         None => return print_usage(),
     };
     let board_num = match args.next() {
-        Some(num) => num.parse::<u8>().unwrap(),
+        Some(num) => num.parse::<usize>().unwrap(),
         None => return print_usage(),
     };
     let image_path = match args.next() {
@@ -305,13 +361,16 @@ fn main() {
         }
     };
 
-    let world = match load_world(&world_data) {
+    let mut world = match load_world(&world_data) {
         Ok(world) => world,
         Err(e) => {
             println!("Error reading {} ({:?})", world_file, e);
             exit(1)
         }
     };
+
+    let world_path = Path::new(&world_file).parent().unwrap();
+    run_all_robots(&mut world, &world_path, board_num);
 
     match File::create(&image_path) {
         Ok(mut file) => {
