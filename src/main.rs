@@ -151,6 +151,7 @@ fn char_from_id(id: u8, param: u8, robots: &[Robot], sensors: &[Sensor]) -> u8 {
         125 => 226,
         126 => 232,
 
+        127 => 0x02,
         _ => b'!',
     }
 }
