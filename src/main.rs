@@ -1,14 +1,16 @@
 extern crate env_logger;
 extern crate image;
 extern crate itertools;
+extern crate num_traits;
 extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
 use libmzx::{
     load_world, World, Charset, Palette, Robot, OverlayMode, Sensor, Command, Counters, Resolve,
-    WorldState, Board,
+    WorldState, Board, Thing
 };
+use num_traits::FromPrimitive;
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -48,110 +50,110 @@ fn draw_char(ch: u8,
 }
 
 fn char_from_id(id: u8, param: u8, robots: &[Robot], sensors: &[Sensor]) -> u8 {
-    match id {
-        0 => b' ',
-        1 => 178,
-        2 => 219,
-        3 => 6,
+    match Thing::from_u8(id).expect("invalid thing") {
+        Thing::Space => b' ',
+        Thing::Normal => 178,
+        Thing::Solid => 219,
+        Thing::Tree => 6,
 
-        5 => param,
-        6 => 177,
-        7 => param,
-        8 => 233,
-        9 => 254,
-        10 => param,
-        11 => 254,
-        12 => param,
-        13 => 178,
-        14 => 177,
-        15 => 176,
-        16 => 254,
-        17 => param,
-
-
-        20 => 176,
-        21 => 24,
-        22 => 25,
-        23 => 26,
-        24 => 27,
+        Thing::CustomBlock => param,
+        Thing::Breakaway => 177,
+        Thing::CustomBreak => param,
+        Thing::Boulder => 233,
+        Thing::Crate => 254,
+        Thing::CustomPush => param,
+        Thing::Box => 254,
+        Thing::CustomBox => param,
+        Thing::Fake => 178,
+        Thing::Carpet => 177,
+        Thing::Floor => 176,
+        Thing::Tiles => 254,
+        Thing::CustomFloor => param,
 
 
-        27 => 160,
-        28 => 4,
-        29 => 4,
-        30 => 3,
-        31 => 9,
-        32 => 150,
-        33 => 7,
-        34 => 176,
-
-        36 => 11,
-
-        38 => 177,
-        39 => 12,
-        40 => 10,
+        Thing::StillWater => 176,
+        Thing::NWater => 24,
+        Thing::SWater => 25,
+        Thing::EWater => 26,
+        Thing::WWater => 27,
 
 
-        43 => 240,
-        44 => 239,
+        Thing::Chest => 160,
+        Thing::Gem => 4,
+        Thing::MagicGem => 4,
+        Thing::Health => 3,
+        Thing::Ring => 9,
+        Thing::Potion => 150,
+        Thing::Energizer => 7,
+        Thing::Goop => 176,
+
+        Thing::Bomb => 11,
+
+        Thing::Explosion => 177,
+        Thing::Key => 12,
+        Thing::Lock => 10,
 
 
-        47 => 22,
-        48 => 95,
-
-        50 => 7,
-        51 => param,
-        52 => param,
-        53 => param,
-        54 => param,
-        55 => 229,
-
-        57 => 18,
-        58 => 29,
-
-        60 => 206,
+        Thing::Stairs => 240,
+        Thing::Cave => 239,
 
 
+        Thing::Gate => 22,
+        Thing::OpenGate => 95,
+
+        Thing::Coin => 7,
+        Thing::NMovingWall => param,
+        Thing::SMovingWall => param,
+        Thing::EMovingWall => param,
+        Thing::WMovingWall => param,
+        Thing::Pouch => 229,
+
+        Thing::SliderNS => 18,
+        Thing::SliderEW => 29,
+
+        Thing::LazerGun => 206,
 
 
-        65 => 178,
-
-        67 => 54,
-        68 => 64,
-        69 => 57,
-        70 => 149,
-        71 => b' ',
-
-        73 => 42,
 
 
-        76 => param,
-        77 => param,
+        Thing::Forest => 178,
+
+        Thing::Whirlpool1 => 54,
+        Thing::Whirlpool2 => 64,
+        Thing::Whirlpool3 => 57,
+        Thing::Whirlpool4 => 149,
+        Thing::InvisibleWall => b' ',
+
+        Thing::Ricochet => 42,
 
 
-        80 => 235,
-        81 => 236,
-        82 => 1,
-        83 => 42,
-        84 => 2,
-        85 => 234,
-        86 => 21,
-        87 => 224,
-        88 => 94,
-        89 => 15,
-        90 => 5,
-        91 => 227,
+        Thing::CustomHurt => param,
+        Thing::Text => param,
 
 
-        94 => 153,
-        95 => 148,
+        Thing::Snake => 235,
+        Thing::Eye => 236,
+        Thing::Thief => 1,
+        Thing::SlimeBlob => 42,
+        Thing::Runner => 2,
+        Thing::Ghost => 234,
+        Thing::Dragon => 21,
+        Thing::Fish => 224,
+        Thing::Shark => 94,
+        Thing::Spider => 15,
+        Thing::Goblin => 5,
+        Thing::SpittingTiger => 227,
 
-        122 => sensors[param as usize - 1].ch,
-        123 | 124 => robots[param as usize - 1].ch,
-        125 => 226,
-        126 => 232,
 
-        127 => 0x02,
+        Thing::Bear => 153,
+        Thing::BearCub => 148,
+
+        Thing::Sensor => sensors[param as usize - 1].ch,
+        Thing::RobotPushable | Thing::Robot => robots[param as usize - 1].ch,
+        Thing::Sign => 226,
+        Thing::Scroll => 232,
+        Thing::Player => 0x02,
+
         _ => b'!',
     }
 }

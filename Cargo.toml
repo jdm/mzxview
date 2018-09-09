@@ -9,7 +9,8 @@ name = "mzxview"
 path = "src/main.rs"
 
 [dependencies]
+env_logger = "0.5"
 image = "0.10"
 itertools = "0.4"
 libmzx = { path = "../libmzx" }
-env_logger = "0.5"
+num-traits = "0.2"
