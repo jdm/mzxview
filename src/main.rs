@@ -326,11 +326,11 @@ fn run_robot_until_end(
                 robot.ch = ch.resolve(counters);
             }
             Command::Color(c) => {
-                board.level_at_mut(&robot.position).0 = c.resolve(counters).0;
+                board.level_at_mut(&robot.position).1 = c.resolve(counters).0;
             }
             Command::PlayerColor(c) => {
                 let player_pos = board.player_pos;
-                board.level_at_mut(&player_pos).0 = c.resolve(counters).0;
+                board.level_at_mut(&player_pos).1 = c.resolve(counters).0;
             }
             _ => (),
         }
