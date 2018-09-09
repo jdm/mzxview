@@ -8,7 +8,7 @@ use image::{RgbImage, DynamicImage, ImageFormat};
 use itertools::Zip;
 use libmzx::{
     load_world, World, Charset, Palette, Robot, OverlayMode, Sensor, Command, Counters, Resolve,
-    WorldState, Board, Thing
+    WorldState, Board, Thing, Color
 };
 use num_traits::FromPrimitive;
 use std::env;
@@ -229,7 +229,7 @@ fn run_robot_until_end(
 ) {
     for cmd in &robot.program {
         match cmd {
-            Command::End => break,
+            Command::End | Command::Wait(_) => break,
             Command::LoadCharSet(ref c) => {
                 let path = world_path.join(c.to_string());
                 match File::open(&path) {
@@ -260,6 +260,14 @@ fn run_robot_until_end(
                         println!("Error opening palette {} ({})", path.display(), e);
                     }
                 }
+            }
+            Command::SetColor(c, r, g, b) => {
+                world.palette.colors[c.resolve(counters) as usize] =
+                    Color {
+                        r: r.resolve(counters) as u8,
+                        g: g.resolve(counters) as u8,
+                        b: b.resolve(counters) as u8,
+                    };
             }
 
             Command::Char(ch) => {
