@@ -4,8 +4,8 @@ extern crate libmzx;
 
 use image::{RgbImage, DynamicImage, ImageFormat};
 use libmzx::{
-    load_world, World, Charset, Palette, Robot, Command, Counters, Resolve,
-    WorldState, Board, Color, Renderer
+    load_world, World, Robot, Command, Counters, Resolve,
+    WorldState, Board, Color, Renderer, Size, Coordinate,
 };
 use std::env;
 use std::fs::File;
@@ -24,8 +24,10 @@ struct ImgRenderer {
 }
 
 fn render(w: &WorldState, board: &Board, robots: &[Robot]) -> Option<RgbImage> {
-    let px_width = board.width * 8;
-    let px_height = board.height * 14;
+    let render_width = 80usize;
+    let render_height = 25usize;
+    let px_width = render_width * 8;
+    let px_height = render_height * 14;
 
     let size = px_width * px_height * 3;
 
@@ -33,7 +35,13 @@ fn render(w: &WorldState, board: &Board, robots: &[Robot]) -> Option<RgbImage> {
         pixels: vec![0; size],
         stride: px_width * 3,
     };
-    libmzx::render(w, board, robots, &mut r);
+    libmzx::render(
+        w,
+        (Coordinate(0, 0), Size(render_width as u8, render_height as u8)),
+        Coordinate(0, 0),
+        board,
+        robots,
+        &mut r);
     RgbImage::from_raw(px_width as u32, px_height as u32, r.pixels)
 }
 

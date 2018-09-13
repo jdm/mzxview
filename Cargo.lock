@@ -272,7 +272,6 @@ version = "0.1.0"
 dependencies = [
  "env_logger 0.5.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.10.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "itertools 0.4.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "libmzx 0.1.0",
 ]
 
